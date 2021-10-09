@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_restful import Api
-from flask_jwt import JWT
+from flask_jwt import JWT, timedelta
 from security import authenticate, identity
 from user import UserRegister
 from item import Item, ItemList
@@ -11,6 +11,7 @@ app.secret_key = KEY
 api = Api(app)
 
 jwt = JWT(app, authenticate, identity) #creates new endpoint /auth
+app.config['JWT_EXPIRATION_DELTA'] = timedelta(seconds=1800)
 
 api.add_resource(Item, '/item/<string:name>')
 api.add_resource(ItemList, '/items')
