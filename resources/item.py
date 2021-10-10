@@ -11,7 +11,7 @@ class Item(Resource):
         help="This field cannot be left blank!"
     )
 
-    @jwt_required
+    @jwt_required()
     def get(self, name):
         item = ItemModel.find_by_name(name)
         if item:
@@ -19,7 +19,6 @@ class Item(Resource):
         return {'message': 'Item not found'}, 404
 
     def post(self, name):
-        #data = request.get_json() #silent or force
         if ItemModel.find_by_name(name):
             return {"message": "An item with name '{}' already exists.".format(name)}, 400
 
@@ -27,42 +26,35 @@ class Item(Resource):
         item = ItemModel(name, data['price'])
 
         try:
-            item.insert()
+            item.save_to_db()
         except:
             return {"message": "An error ocurred inserting the item."}, 500
 
-        return item, 201
+        return item.json(), 201
 
     def delete(self, name):
-        connection = sqlite3.connect('data.db')
-        cursor = connection.cursor()
-
-        query = "DELETE FROM items WHERE name=?"
-        cursor.execute(query, (name,))
-
-        connection.commit()
-        connection.close()
-
+        item = ItemModel.find_by_name(name)
+        if item:
+            item.delete_from_db()
         return {'message': 'Item deleted'}
 
     def put(self, name):
         data = Item.parser.parse_args()
-
         item = ItemModel.find_by_name(name)
-        updated_item = ItemModel(name, data['price'])
 
         if item is None:
             try:
-                updated_item.insert()
+                item = ItemModel(name,data['price'])
             except:
                 return {"message", "An error ocurred inserting the item."}, 500
         else:
             try:
-                updated_item.update()
+                item.price = data['price']
             except:
                 return {"message", "An error ocurred inserting the item."}, 500
+        item.save_to_db()
 
-        return updated_item.json(), 201
+        return item.json(), 201
 
 
 class ItemList(Resource):
