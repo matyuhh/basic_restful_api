@@ -4,6 +4,7 @@ from flask_jwt import JWT, timedelta
 from security import authenticate, identity
 from resources.user import UserRegister
 from resources.item import Item, ItemList
+from resources.store import Store, StoreList
 from keys import KEY
 
 app = Flask(__name__)
@@ -19,8 +20,10 @@ def create_tables():
 jwt = JWT(app, authenticate, identity) #creates new endpoint /auth
 app.config['JWT_EXPIRATION_DELTA'] = timedelta(seconds=1800)
 
+api.add_resource(Store, '/store/<string:name>')
 api.add_resource(Item, '/item/<string:name>')
 api.add_resource(ItemList, '/items')
+api.add_resource(StoreList, '/stores')
 api.add_resource(UserRegister, '/register')
 
 if __name__ == '__main__':
