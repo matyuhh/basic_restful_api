@@ -28,7 +28,7 @@ class Item(Resource):
             return {"message": "An item with name '{}' already exists.".format(name)}, 400
 
         data = Item.parser.parse_args()
-        item = ItemModel(name, data['price'], data['store_id'])
+        item = ItemModel(name, **data)
 
         try:
             item.save_to_db()
@@ -49,7 +49,7 @@ class Item(Resource):
 
         if item is None:
             try:
-                item = ItemModel(name,data['price'], data['store_id'])
+                item = ItemModel(name, **data)
             except:
                 return {"message", "An error ocurred inserting the item."}, 500
         else:
@@ -64,4 +64,4 @@ class Item(Resource):
 
 class ItemList(Resource):
     def get(self):
-        return {'items': [item.json() for item in ItemModel.query.all()]}
+        return {'items': [item.json() for item in ItemModel.find_all()]}
